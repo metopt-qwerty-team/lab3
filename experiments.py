@@ -46,14 +46,16 @@ def run_batch_size_experiment():
         })
 
         # PyTorch SGD
+        print("torch")
         pt_result = train_pytorch_model(
             X_train, y_train, X_test, y_test,
             optimizer_type='sgd',
-            batch_size=batch_size if batch_size != 'full' else len(X_train),
-            learning_rate=0.01,
-            n_epochs=100
+            # batch_size=batch_size if batch_size != 'full' else len(X_train),
+            # learning_rate=0.01,
+            n_epochs=100,
+            optimized_params=[batch_size if batch_size != 'full' else len(X_train), 0.01, 0, 0.9]
         )
-
+        print("finish torch")
         results.append({
             'batch_size': batch_size,
             'implementation': 'pytorch_sgd',
@@ -65,6 +67,15 @@ def run_batch_size_experiment():
 
     return pd.DataFrame(results)
 
+#optimized_params = [batch_size, learning_rate, weight_decay, momentum]
+optimizer_params = {
+    "sgd" : [256, 0.004429, 0.000007, 0.0],
+    "momentum": [256, 0.000853, 0.000005, 0.783443],
+    "nesterov" : [64, 0.000547, 0.000741, 0.506646],
+    "adagrad" : [64, 0.099380, 0.000011, 0.0],
+    "rmsprop" : [64, 0.006476, 0.000166, 0.0],
+    "adam" : [256, 0.096550, 0.000385, 0.0]
+}
 
 def run_optimizer_comparison():
     X_train, X_test, y_train, y_test, _ = load_and_prepare_data()
@@ -78,9 +89,8 @@ def run_optimizer_comparison():
         result = train_pytorch_model(
             X_train, y_train, X_test, y_test,
             optimizer_type=optimizer,
-            batch_size=500,  # ???
-            learning_rate=0.01,
-            n_epochs=100
+            n_epochs=100,
+            optimized_params=optimizer_params[optimizer]
         )
 
         results.append({

@@ -93,15 +93,22 @@ class PyTorchLinearRegression(nn.Module):
     def forward(self, x):
         return self.linear(x)
 
+#optimized_params = [batch_size, learning_rate, weight_decay, momentum]
+def train_pytorch_model(X_train, y_train, X_test, y_test, optimizer_type='sgd', n_epochs=100,
+                         scheduler_step=30, optimized_params = [32, 0.01, 0.0, 0.9]):
+    
+    batch_size = int(optimized_params[0])
+    learning_rate = optimized_params[1]
+    weight_decay = optimized_params[2]
+    momentum = optimized_params[3]
 
-def train_pytorch_model(X_train, y_train, X_test, y_test, optimizer_type='sgd',
-                        batch_size=32, n_epochs=100, learning_rate=0.01,
-                        momentum=0.9, weight_decay=0, scheduler_step=30):
     # Convert to tensors
     X_train_t = torch.FloatTensor(X_train)
-    y_train_t = torch.FloatTensor(y_train.values).view(-1, 1)
+    # y_train_t = torch.FloatTensor(y_train.values).view(-1, 1)
+    y_train_t = torch.FloatTensor(np.asarray(y_train)).view(-1, 1)
     X_test_t = torch.FloatTensor(X_test)
-    y_test_t = torch.FloatTensor(y_test.values).view(-1, 1)
+    # y_test_t = torch.FloatTensor(y_test.values).view(-1, 1)
+    y_test_t = torch.FloatTensor(np.asarray(y_test)).view(-1, 1)
 
     # Create dataset and dataloader
     train_dataset = TensorDataset(X_train_t, y_train_t)
