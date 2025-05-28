@@ -11,6 +11,8 @@ def load_and_prepare_data(test_size=0.2, random_state=42):
     # Get data
     X = wine_quality.data.features
     y = wine_quality.data.targets['quality']  # Extract target as Series
+    # print("Первые 5 строк X:\n", X.head())
+    # print("\nПервые 5 значений y:\n", y.head())
 
     # Handle missing values if any (though dataset says no missing values)
     X = X.fillna(X.mean())
@@ -26,3 +28,4 @@ def load_and_prepare_data(test_size=0.2, random_state=42):
     X_test_scaled = scaler.transform(X_test)
 
     return X_train_scaled, X_test_scaled, y_train, y_test, scaler
+
