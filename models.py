@@ -25,6 +25,26 @@ class LinearRegressionSGD:
         self.weights = None
         self.bias = None
         self.loss_history = []
+        self.total_flops = 0
+
+    @staticmethod
+    def count_flops(batch_size: int, n_features: int) -> dict:
+        '''
+        exluded:
+        1) Regularization operations
+        2) Data shuffling operations
+        3) Vectorized NumPy operations (count as one operation)
+        '''
+        
+        B, D = batch_size, n_features
+        return {
+            'multiply': B*D + D*B + D + D + 1,  # +1 for bias update
+            'add': B*(D-1) + D*(B-1) + B,       # +B for bias in prediction
+            'subtract': B + D + 1,              # +1 for bias update
+            'divide': D + 1,                    # scaling grad_w и grad_b
+            'total': 0 
+        }
+    
 
     def _learning_rate(self, epoch):
         if self.learning_rate_schedule == 'time_based':
@@ -41,6 +61,10 @@ class LinearRegressionSGD:
         n_samples, n_features = X.shape
         self.weights = np.zeros(n_features)
         self.bias = 0
+        self.total_flops = 0
+
+        flops_per_batch = self.count_flops(min(self.batch_size, n_samples), n_features)
+        flops_per_batch['total'] = sum(flops_per_batch.values()) - flops_per_batch['total']
 
         for epoch in range(self.n_epochs):
             lr = self._learning_rate(epoch)
@@ -74,6 +98,8 @@ class LinearRegressionSGD:
                 # Update parameters
                 self.weights -= lr * grad_w
                 self.bias -= lr * grad_b
+                self.total_flops += flops_per_batch['total']
+
 
             # Compute and store loss for monitoring
             y_pred_all = np.dot(X, self.weights) + self.bias
@@ -97,6 +123,21 @@ class PyTorchLinearRegression(nn.Module):
 #optimized_params = [batch_size, learning_rate, weight_decay, momentum]
 def train_pytorch_model(X_train, y_train, X_test, y_test, optimizer_type='sgd', n_epochs=100,
                          scheduler_step=30, optimized_params = [32, 0.01, 0.0, 0.9]):
+    
+    def count_pytorch_flops(model, X_batch):
+        B, D = X_batch.shape[0], X_batch.shape[1]
+        # Для линейного слоя: D умножений и D сложений на пример
+        # Плюс аналогичные операции для backward pass (примерно в 2-3 раза больше)
+        return {
+            'multiply': B*D * 3,  # mul in forward and backward
+            'add': B*D * 3,        # add in forward and backward
+            'subtract': B,          # error: pred - y
+            'divide': 2,            # grad normalization
+            'total': B*D*6 + B + 2  # total approx quan
+        }
+
+    total_flops = 0
+
     # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # if torch.cuda.is_available():
     #     torch.cuda.reset_peak_memory_stats()
@@ -158,6 +199,9 @@ def train_pytorch_model(X_train, y_train, X_test, y_test, optimizer_type='sgd', 
             optimizer.step()
             epoch_losses.append(loss.item())
 
+            batch_flops = count_pytorch_flops(model, X_batch)
+            total_flops += batch_flops['total']
+
         scheduler.step()
 
         # Compute average epoch loss
@@ -188,5 +232,6 @@ def train_pytorch_model(X_train, y_train, X_test, y_test, optimizer_type='sgd', 
         'test_losses': test_losses,
         'training_time': training_time,
         'memory_usage': memory_usage,
-        'final_mse': mse
+        'final_mse': mse,
+        'flops': total_flops
     }

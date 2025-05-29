@@ -53,7 +53,8 @@ def run_batch_size_experiment():
             'mse': mse,
             'training_time': training_time,
             'memory_usage': memory_usage,
-            'final_loss': model.loss_history[-1]
+            'final_loss': model.loss_history[-1],
+            'total_flops': model.total_flops
         })
 
         # PyTorch SGD
@@ -73,7 +74,8 @@ def run_batch_size_experiment():
             'mse': pt_result['final_mse'],
             'training_time': pt_result['training_time'],
             'memory_usage': pt_result['memory_usage'],
-            'final_loss': pt_result['test_losses'][-1]
+            'final_loss': pt_result['test_losses'][-1],
+            'total_flops': pt_result['flops']
         })
 
     return pd.DataFrame(results)
@@ -111,7 +113,8 @@ def run_optimizer_comparison():
             'memory_usage': result['memory_usage'],
             'final_loss': result['test_losses'][-1],
             'train_loss_history': result['train_losses'],
-            'test_loss_history': result['test_losses']
+            'test_loss_history': result['test_losses'],
+            'total_flops': result['flops'],
         })
 
     return pd.DataFrame(results)
@@ -159,7 +162,8 @@ def run_regularization_experiment():
                 'mse': mse,
                 'training_time': training_time,
                 'memory_usage': memory_usage,
-                'final_loss': model.loss_history[-1]
+                'final_loss': model.loss_history[-1],
+                'total_flops': model.total_flops
             })
 
     return pd.DataFrame(results)
@@ -201,7 +205,8 @@ def run_learning_rate_schedule_experiment():
             'training_time': training_time,
             'memory_usage': memory_usage,
             'final_loss': model.loss_history[-1],
-            'loss_history': model.loss_history
+            'loss_history': model.loss_history,
+            'total_flops': model.total_flops
         })
 
     return pd.DataFrame(results)
