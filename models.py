@@ -126,8 +126,6 @@ def train_pytorch_model(X_train, y_train, X_test, y_test, optimizer_type='sgd', 
     
     def count_pytorch_flops(model, X_batch):
         B, D = X_batch.shape[0], X_batch.shape[1]
-        # Для линейного слоя: D умножений и D сложений на пример
-        # Плюс аналогичные операции для backward pass (примерно в 2-3 раза больше)
         return {
             'multiply': B*D * 3,  # mul in forward and backward
             'add': B*D * 3,        # add in forward and backward
@@ -136,7 +134,7 @@ def train_pytorch_model(X_train, y_train, X_test, y_test, optimizer_type='sgd', 
             'total': B*D*6 + B + 2  # total approx quan
         }
 
-    total_flops = 0
+    
 
     # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # if torch.cuda.is_available():
@@ -158,10 +156,17 @@ def train_pytorch_model(X_train, y_train, X_test, y_test, optimizer_type='sgd', 
     train_dataset = TensorDataset(X_train_t, y_train_t)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
+
     # Model
     input_dim = X_train.shape[1]
     model = PyTorchLinearRegression(input_dim)
     criterion = nn.MSELoss()
+
+
+    total_flops = 0
+    sample_batch = next(iter(train_loader))[0]
+    per_batch_flops = count_pytorch_flops(model, sample_batch)['total']
+
 
     # Optimizer
     if optimizer_type == 'sgd':
@@ -199,8 +204,10 @@ def train_pytorch_model(X_train, y_train, X_test, y_test, optimizer_type='sgd', 
             optimizer.step()
             epoch_losses.append(loss.item())
 
-            batch_flops = count_pytorch_flops(model, X_batch)
-            total_flops += batch_flops['total']
+            # batch_flops = count_pytorch_flops(model, X_batch)
+            total_flops += per_batch_flops
+
+            # total_flops += batch_flops['total']
 
         scheduler.step()
 

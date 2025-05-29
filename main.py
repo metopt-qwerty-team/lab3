@@ -2,7 +2,8 @@ from experiments import (
     run_batch_size_experiment,
     run_optimizer_comparison,
     run_regularization_experiment,
-    run_learning_rate_schedule_experiment
+    run_learning_rate_schedule_experiment,
+    run_small_batch_size_experiment
 )
 from visualization import (
     plot_batch_size_results,
@@ -13,6 +14,12 @@ from visualization import (
 
 
 def main():
+    print("Running small batch size experiment...")
+    small_batch_size_results = run_small_batch_size_experiment()
+    small_batch_size_results.to_csv('small_batch_size_results.csv', index=False)
+    plot_batch_size_results(small_batch_size_results)
+
+
     print("Running batch size experiment...")
     batch_size_results = run_batch_size_experiment()
     batch_size_results.to_csv('batch_size_results.csv', index=False)

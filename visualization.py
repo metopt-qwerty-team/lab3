@@ -3,39 +3,40 @@ import seaborn as sns
 
 
 def plot_batch_size_results(results_df):
+    print(results_df)
     plt.figure(figsize=(12, 8))
 
     # MSE plot
     plt.subplot(2, 3, 1)
-    sns.lineplot(data=results_df, x='batch_size', y='mse', hue='implementation')
+    sns.scatterplot(data=results_df, x='batch_size', y='mse', hue='implementation')
     plt.title('MSE by Batch Size')
     plt.xlabel('Batch Size')
     plt.ylabel('Mean Squared Error')
 
     # Training time plot
     plt.subplot(2, 3, 2)
-    sns.lineplot(data=results_df, x='batch_size', y='training_time', hue='implementation')
+    sns.scatterplot(data=results_df, x='batch_size', y='training_time', hue='implementation')
     plt.title('Training Time by Batch Size')
     plt.xlabel('Batch Size')
     plt.ylabel('Training Time (s)')
 
     # Memory usage plot
     plt.subplot(2, 3, 3)
-    sns.lineplot(data=results_df, x='batch_size', y='memory_usage', hue='implementation')
+    sns.scatterplot(data=results_df, x='batch_size', y='memory_usage', hue='implementation')
     plt.title('Memory Usage by Batch Size')
     plt.xlabel('Batch Size')
     plt.ylabel('Memory Usage (MB)')
 
     # Final loss plot
     plt.subplot(2, 3, 4)
-    sns.lineplot(data=results_df, x='batch_size', y='final_loss', hue='implementation')
+    sns.scatterplot(data=results_df, x='batch_size', y='final_loss', hue='implementation')
     plt.title('Final Loss by Batch Size')
     plt.xlabel('Batch Size')
     plt.ylabel('Final Loss')
 
     # Operations plot
     plt.subplot(2, 3, 5)
-    sns.lineplot(data=results_df, x='batch_size', y='total_flops', hue='implementation')
+    sns.scatterplot(data=results_df, x='batch_size', y='total_flops', hue='implementation')
     plt.title('Total operations by Batch Size')
     plt.xlabel('Batch Size')
     plt.ylabel('Total flops')
