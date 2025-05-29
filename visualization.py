@@ -1,48 +1,34 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
-import numpy as np
-
-
-def _prepare_plot_data(results_df):
-    """Преобразует DataFrame в словарь numpy массивов для построения графиков"""
-    plot_data = {}
-    for column in results_df.columns:
-        if isinstance(results_df[column].iloc[0], (list, np.ndarray)):
-            # Для столбцов с историей (learning curves) оставляем как есть
-            plot_data[column] = results_df[column]
-        else:
-            plot_data[column] = results_df[column].values
-    return plot_data
 
 
 def plot_batch_size_results(results_df):
-    data = _prepare_plot_data(results_df)
     plt.figure(figsize=(12, 8))
 
     # MSE plot
     plt.subplot(2, 2, 1)
-    sns.lineplot(data=data, x='batch_size', y='mse', hue='implementation')
+    sns.lineplot(data=results_df, x='batch_size', y='mse', hue='implementation')
     plt.title('MSE by Batch Size')
     plt.xlabel('Batch Size')
     plt.ylabel('Mean Squared Error')
 
     # Training time plot
     plt.subplot(2, 2, 2)
-    sns.lineplot(data=data, x='batch_size', y='training_time', hue='implementation')
+    sns.lineplot(data=results_df, x='batch_size', y='training_time', hue='implementation')
     plt.title('Training Time by Batch Size')
     plt.xlabel('Batch Size')
     plt.ylabel('Training Time (s)')
 
     # Memory usage plot
     plt.subplot(2, 2, 3)
-    sns.lineplot(data=data, x='batch_size', y='memory_usage', hue='implementation')
+    sns.lineplot(data=results_df, x='batch_size', y='memory_usage', hue='implementation')
     plt.title('Memory Usage by Batch Size')
     plt.xlabel('Batch Size')
     plt.ylabel('Memory Usage (MB)')
 
     # Final loss plot
     plt.subplot(2, 2, 4)
-    sns.lineplot(data=data, x='batch_size', y='final_loss', hue='implementation')
+    sns.lineplot(data=results_df, x='batch_size', y='final_loss', hue='implementation')
     plt.title('Final Loss by Batch Size')
     plt.xlabel('Batch Size')
     plt.ylabel('Final Loss')
@@ -53,33 +39,32 @@ def plot_batch_size_results(results_df):
 
 
 def plot_optimizer_comparison(results_df):
-    data = _prepare_plot_data(results_df)
     plt.figure(figsize=(12, 8))
 
     # MSE plot
     plt.subplot(2, 2, 1)
-    sns.barplot(data=data, x='optimizer', y='mse')
+    sns.barplot(data=results_df, x='optimizer', y='mse')
     plt.title('MSE by Optimizer')
     plt.xlabel('Optimizer')
     plt.ylabel('Mean Squared Error')
 
     # Training time plot
     plt.subplot(2, 2, 2)
-    sns.barplot(data=data, x='optimizer', y='training_time')
+    sns.barplot(data=results_df, x='optimizer', y='training_time')
     plt.title('Training Time by Optimizer')
     plt.xlabel('Optimizer')
     plt.ylabel('Training Time (s)')
 
     # Memory usage plot
     plt.subplot(2, 2, 3)
-    sns.barplot(data=data, x='optimizer', y='memory_usage')
+    sns.barplot(data=results_df, x='optimizer', y='memory_usage')
     plt.title('Memory Usage by Optimizer')
     plt.xlabel('Optimizer')
     plt.ylabel('Memory Usage (MB)')
 
     # Final loss plot
     plt.subplot(2, 2, 4)
-    sns.barplot(data=data, x='optimizer', y='final_loss')
+    sns.barplot(data=results_df, x='optimizer', y='final_loss')
     plt.title('Final Loss by Optimizer')
     plt.xlabel('Optimizer')
     plt.ylabel('Final Loss')
@@ -94,11 +79,11 @@ def plot_learning_curves(results_df, experiment_type):
 
     if experiment_type == 'optimizer':
         for _, row in results_df.iterrows():
-            plt.plot(np.array(row['test_loss_history']), label=row['optimizer'])
+            plt.plot(row['test_loss_history'], label=row['optimizer'])
         plt.title('Learning Curves by Optimizer')
     elif experiment_type == 'schedule':
         for _, row in results_df.iterrows():
-            plt.plot(np.array(row['loss_history']), label=row['schedule'])
+            plt.plot(row['loss_history'], label=row['schedule'])
         plt.title('Learning Curves by Learning Rate Schedule')
 
     plt.xlabel('Epoch')
@@ -110,12 +95,11 @@ def plot_learning_curves(results_df, experiment_type):
 
 
 def plot_regularization_results(results_df):
-    data = _prepare_plot_data(results_df)
     plt.figure(figsize=(12, 8))
 
     # MSE plot
     plt.subplot(2, 2, 1)
-    sns.lineplot(data=data, x='alpha', y='mse', hue='regularization')
+    sns.lineplot(data=results_df, x='alpha', y='mse', hue='regularization')
     plt.title('MSE by Regularization Type')
     plt.xlabel('Alpha')
     plt.ylabel('Mean Squared Error')
@@ -123,7 +107,7 @@ def plot_regularization_results(results_df):
 
     # Training time plot
     plt.subplot(2, 2, 2)
-    sns.lineplot(data=data, x='alpha', y='training_time', hue='regularization')
+    sns.lineplot(data=results_df, x='alpha', y='training_time', hue='regularization')
     plt.title('Training Time by Regularization Type')
     plt.xlabel('Alpha')
     plt.ylabel('Training Time (s)')
@@ -131,15 +115,15 @@ def plot_regularization_results(results_df):
 
     # Memory usage plot
     plt.subplot(2, 2, 3)
-    sns.lineplot(data=data, x='alpha', y='memory_usage', hue='regularization')
+    sns.lineplot(data=results_df, x='alpha', y='memory_usage', hue='regularization')
     plt.title('Memory Usage by Regularization Type')
     plt.xlabel('Alpha')
-    plt.ylabel('Memory Usage (MB)')
+    plt.ylabel('Memory Usage (KB)')
     plt.xscale('log')
 
     # Final loss plot
     plt.subplot(2, 2, 4)
-    sns.lineplot(data=data, x='alpha', y='final_loss', hue='regularization')
+    sns.lineplot(data=results_df, x='alpha', y='final_loss', hue='regularization')
     plt.title('Final Loss by Regularization Type')
     plt.xlabel('Alpha')
     plt.ylabel('Final Loss')

@@ -1,15 +1,20 @@
 import pandas as pd
 import time
 import psutil
+import os
+import resource
+import tracemalloc
 from sklearn.metrics import mean_squared_error
 from models import LinearRegressionSGD, train_pytorch_model
 from prepare_data import load_and_prepare_data
 
 
+
 def run_batch_size_experiment():
     X_train, X_test, y_train, y_test, _ = load_and_prepare_data()
 
-    batch_sizes = [1, 100, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, len(X_train)]
+    # batch_sizes = [1, 100, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, len(X_train)]
+    batch_sizes = [100, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, len(X_train)]
     results = []
 
     for batch_size in batch_sizes:
@@ -18,6 +23,7 @@ def run_batch_size_experiment():
         # Custom SGD implementation
         start_time = time.time()
         # mem_before = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        # tracemalloc.start()
 
         process = psutil.Process()
 
@@ -27,6 +33,11 @@ def run_batch_size_experiment():
             n_epochs=100
         )
         model.fit(X_train, y_train)
+
+        # _, peak = tracemalloc.get_traced_memory()
+        # tracemalloc.stop()
+
+
 
         # mem_after = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         training_time = time.time() - start_time
@@ -120,10 +131,11 @@ def run_regularization_experiment():
             start_time = time.time()
             # mem_before = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             process = psutil.Process()
+            # tracemalloc.start()
 
             model = LinearRegressionSGD(
                 learning_rate=0.01,
-                batch_size=500,  # ???,
+                batch_size=256,  # ???,
                 n_epochs=100,
                 regularization=reg,
                 alpha=alpha,
@@ -135,6 +147,8 @@ def run_regularization_experiment():
             training_time = time.time() - start_time
 
             memory_usage = process.memory_info().rss / (1024 * 1024)  # в MB
+            # _, peak = tracemalloc.get_traced_memory()
+            # tracemalloc.stop()
 
             y_pred = model.predict(X_test)
             mse = mean_squared_error(y_test, y_pred)
@@ -163,10 +177,10 @@ def run_learning_rate_schedule_experiment():
         start_time = time.time()
         # mem_before = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         process = psutil.Process()
-
+        # tracemalloc.start()
         model = LinearRegressionSGD(
             learning_rate=0.1,  # Higher initial rate for schedules
-            batch_size=500,  # ???
+            batch_size=256,  # ???
             n_epochs=100,
             learning_rate_schedule=schedule
         )
@@ -176,7 +190,8 @@ def run_learning_rate_schedule_experiment():
         training_time = time.time() - start_time
         # memory_usage = (mem_after - mem_before) / (1024 * 1024)  # in MB
         memory_usage = process.memory_info().rss / (1024 * 1024)  # в MB
-
+        # _, peak = tracemalloc.get_traced_memory()
+        # tracemalloc.stop()
         y_pred = model.predict(X_test)
         mse = mean_squared_error(y_test, y_pred)
 

@@ -1,4 +1,5 @@
 import numpy as np
+import tracemalloc
 from sklearn.metrics import mean_squared_error
 from sklearn.linear_model import SGDRegressor
 from sklearn.model_selection import cross_val_score
@@ -96,7 +97,9 @@ class PyTorchLinearRegression(nn.Module):
 #optimized_params = [batch_size, learning_rate, weight_decay, momentum]
 def train_pytorch_model(X_train, y_train, X_test, y_test, optimizer_type='sgd', n_epochs=100,
                          scheduler_step=30, optimized_params = [32, 0.01, 0.0, 0.9]):
-    
+    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # if torch.cuda.is_available():
+    #     torch.cuda.reset_peak_memory_stats()
     batch_size = int(optimized_params[0])
     learning_rate = optimized_params[1]
     weight_decay = optimized_params[2]
@@ -168,6 +171,10 @@ def train_pytorch_model(X_train, y_train, X_test, y_test, optimizer_type='sgd', 
             test_losses.append(test_loss)
 
     training_time = time.time() - start_time
+    # if torch.cuda.is_available():
+    #     memory_usage = torch.cuda.max_memory_allocated() / (1024 * 1024)  # in MB
+    # else:
+    #     memory_usage = -1
     memory_usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / (1024 * 1024)  # in MB
 
     # Final evaluation
